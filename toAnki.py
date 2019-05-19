@@ -30,9 +30,9 @@ def formAnkiData(fromData,ankiData):
         yearE= Enum[0]
         Qu_picName= Enum[1]
         An_picName= Enum[2]
-        
+        outName=yearE+Qu_picName
        
-        str1="\"<img src=\"\"%s\"\" />\"" % (yearE+Qu_picName)
+        str1="\"<div>%s</div><img src=\"\"%s\"\" />\"" % (outName[:-4],outName)
         str2="\"<img src=\"\"%s\"\" />\"" % (yearE+An_picName)
         ankiData.append([str1,yearE,str2])
     
@@ -41,11 +41,17 @@ def formAnkiData(fromData,ankiData):
 
 
 def copyfile(from_path,to_path,filedata,index=1):
+    if index==1:
+        from_path=os.path.join(from_path,'QU')
+    else:
+        from_path=os.path.join(from_path,'AN')
+        
     if not os.path.exists(to_path):
         os.mkdir(to_path)
 #print(os.path.join(from_path,filename1))
+        
     for eachfile in filedata:
-        shutil.copy(os.path.join(from_path,eachfile[0],eachfile[index]),os.path.join(to_path,eachfile[0]+eachfile[index]))
+        shutil.copy(os.path.join(from_path,eachfile[0],eachfile[1]),os.path.join(to_path,eachfile[0]+eachfile[index]))
     #shutil.copy(os.path.join(from_path,fileName),os.path.join(to_path,asName))
     
 def writeAnki_txt(to_filepath,data2write):
@@ -60,14 +66,14 @@ def main():
     from_path="C:\\Users\\Administrator\\Documents\\Snagit"
     #to_path="D:\\media"
     Exc_path="E:\\新建文件夹\\错题to_anki"
-    Exc_filename="错题20190512.xlsm"
+    Exc_filename="错题集WWX.xls"
     getExcData(os.path.join(Exc_path,Exc_filename),ExcData)
     
     formAnkiData(ExcData,ankiData)  
     writeAnki_txt(os.path.join(Exc_path,"out.txt"),ankiData)
     copyfile(from_path,os.path.join(Exc_path,"media"),ExcData,1)
-    
-    #print(ExcData)
+    copyfile(from_path,os.path.join(Exc_path,"media"),ExcData,2)
+   # print(ExcData)
     #print(ankiData)
  #   frame = pd.DataFrame(ankiData)
  #   frame.to_csv(os.path.join(to_path,"out.txt"))
