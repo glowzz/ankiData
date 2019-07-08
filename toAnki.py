@@ -12,9 +12,11 @@ from docx import Document
 from docx.shared import Inches
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 
-def getExcData(Exc_path,ExcData):
-    df1 = pd.read_excel(Exc_path)
+def getExcData(Exc_path,sheetNum):
+    ExcData=[]
+    df1 = pd.read_excel(Exc_path,sheet_name=sheetNum)
     df2 = df1.dropna(thresh=2)
+    column_name=df2.columns[1]
     for index in df2.index:
         yearErr=df2.loc[index].dropna().values
         yearE=yearErr[0]
@@ -24,11 +26,11 @@ def getExcData(Exc_path,ExcData):
             QpicName="%02d.png" % Enum
             ApicName="%02dAN.png" % Enum
             ExcData.append([yearE,QpicName,ApicName])
+    return ExcData,column_name
     
     
-    
-def formAnkiData(fromData,ankiData):
-    
+def formAnkiData(fromData):
+    ankiData=[]
     for Enum in fromData:
         yearE= Enum[0]
         Qu_picName= Enum[1]
@@ -38,7 +40,7 @@ def formAnkiData(fromData,ankiData):
         str1="\"<div>%s</div><img src=\"\"%s\"\" />\"" % (outName[:-4],outName)
         str2="\"<img src=\"\"%s\"\" />\"" % (yearE+An_picName)
         ankiData.append([str1,yearE,str2])
-    
+    return ankiData
     
 
 
@@ -101,24 +103,27 @@ def copy_all_file(from_path,to_path,filedata):
         shutil.copy(os.path.join(from_path,eachfile[0]+eachfile[2]),to_path)  
     
 def main():
-    ankiData=[]
-    ExcData=[]
+    
     from_path="C:\\Users\\Administrator\\Documents\\Snagit"
     to_path=r"C:\Users\Administrator\AppData\Roaming\Anki2\000\collection.media"
     Exc_path="E:\\新建文件夹\\错题to_anki"
-    Exc_filename="错题集WWX.xls"
-    getExcData(os.path.join(Exc_path,Exc_filename),ExcData)
+    Exc_filename="错题all.xlsx"
+    for i in range(4):
+        
+        ankiData=[]
+        ExcData=[]
+        ExcData,student_name=getExcData(os.path.join(Exc_path,Exc_filename),i)
+        
+        ankiData=formAnkiData(ExcData)  
+    #    print(ExcData)
     
-    formAnkiData(ExcData,ankiData)  
-    print(ExcData)
-
-    
-    writeAnki_txt(os.path.join(Exc_path,"out.txt"),ankiData)
-    copyfile(from_path,os.path.join(Exc_path,"media"),ExcData,1)
-    copyfile(from_path,os.path.join(Exc_path,"media"),ExcData,2)
-#    writeDoc(os.path.join(Exc_path,"错题.docx"),from_path,ExcData)
- 
-    copy_all_file(os.path.join(Exc_path,"media"),to_path,ExcData)    
+        print(student_name)
+        writeAnki_txt(os.path.join(Exc_path,student_name+".txt"),ankiData)
+        copyfile(from_path,os.path.join(Exc_path,"media"),ExcData,1)
+        copyfile(from_path,os.path.join(Exc_path,"media"),ExcData,2)
+    #    writeDoc(os.path.join(Exc_path,"错题.docx"),from_path,ExcData)
+     
+        copy_all_file(os.path.join(Exc_path,"media"),to_path,ExcData)    
     
     #print(ankiData)
  #   frame = pd.DataFrame(ankiData)
