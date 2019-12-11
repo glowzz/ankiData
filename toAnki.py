@@ -8,6 +8,7 @@ Created on Sun May 12 11:40:55 2019
 import pandas as pd
 import os
 import shutil
+import datetime
 from docx import Document
 from docx.shared import Inches
 from docx.enum.text import WD_ALIGN_PARAGRAPH
@@ -56,7 +57,11 @@ def copyfile(from_path,to_path,filedata,index=1):
 #print(os.path.join(from_path,filename1))
         
     for eachfile in filedata:
-        shutil.copy(os.path.join(from_path,eachfile[0],eachfile[1]),os.path.join(to_path,eachfile[0]+eachfile[index]))
+        file_path=os.path.join(from_path,eachfile[0],eachfile[1])
+        if os.path.exists(file_path):
+            shutil.copy(file_path,os.path.join(to_path,eachfile[0]+eachfile[index]))
+        else:
+            print(file_path+" no found")            
     #shutil.copy(os.path.join(from_path,fileName),os.path.join(to_path,asName))
     
 def writeAnki_txt(to_filepath,data2write):
@@ -77,7 +82,11 @@ def writeDoc(Save_filepath,from_path,filedata):
     from_path1=os.path.join(from_path,'QU')
     for eachfile in filedata:
         document.add_paragraph(eachfile[0]+eachfile[1].split('.')[0])
-        document.add_picture(os.path.join(from_path1,eachfile[0],eachfile[1]),width=Inches(6))
+        file_path=os.path.join(from_path1,eachfile[0],eachfile[1])
+        if os.path.exists(file_path):
+            document.add_picture(file_path,width=Inches(6))
+        else:
+            print(file_path+" no found")
         document.add_paragraph()
         document.add_paragraph()
         document.add_paragraph()
@@ -89,25 +98,50 @@ def writeDoc(Save_filepath,from_path,filedata):
     p_detail.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
     
     from_path2=os.path.join(from_path,'AN')
+    
     for eachfile in filedata:
         document.add_paragraph(eachfile[0]+eachfile[2].split('.')[0])
-        document.add_picture(os.path.join(from_path2,eachfile[0],eachfile[1]),width=Inches(4))
-   
+        
+        file_path=os.path.join(from_path2,eachfile[0],eachfile[1])
+        if os.path.exists(file_path):
+            document.add_picture(file_path,width=Inches(4))
+        else:
+            print(file_path+" no found")
+            
     document.save(Save_filepath)  
 
 def copy_all_file(from_path,to_path,filedata):
     #lists = os.listdir(from_path)
     for eachfile in filedata:
         #print(i)
+        file_path=os.path.join(from_path,eachfile[0]+eachfile[1])
+        if os.path.exists(file_path):
+            shutil.copy(file_path,to_path)
+        else:
+            print(file_path+" no found") 
+            
+        file_path=os.path.join(from_path,eachfile[0]+eachfile[2])
+        if os.path.exists(file_path):
+            shutil.copy(file_path,to_path)
+        else:
+            print(file_path+" no found") 
+             
+            
+            
+'''           
         shutil.copy(os.path.join(from_path,eachfile[0]+eachfile[1]),to_path)
+        
         shutil.copy(os.path.join(from_path,eachfile[0]+eachfile[2]),to_path)  
+'''        
     
 def main():
     
-    from_path="C:\\Users\\Administrator\\Documents\\Snagit"
-    to_path=r"C:\Users\Administrator\AppData\Roaming\Anki2\000\collection.media"
-    Exc_path="E:\\新建文件夹\\错题to_anki"
-    Exc_filename="错题all.xlsx"
+    now_time = datetime.datetime.now()
+    detester =now_time.strftime('%Y-%m-%d')
+    from_path="E:\\Users\\Administrator\\Documents\\Snagit"
+    to_path=r"C:\Users\Admin\AppData\Roaming\Anki2\000\collection.media"
+    Exc_path="G:\\新建文件夹\\错题to_anki"
+    Exc_filename="错题all_other1.xlsx"
     for i in range(4):
         
         ankiData=[]
@@ -118,12 +152,16 @@ def main():
     #    print(ExcData)
     
         print(student_name)
-        writeAnki_txt(os.path.join(Exc_path,student_name+".txt"),ankiData)
+        writeDoc(os.path.join(Exc_path,student_name+"错题"+detester+".docx"),from_path,ExcData)
+       
+        writeAnki_txt(os.path.join(Exc_path,student_name+detester+".txt"),ankiData)
         copyfile(from_path,os.path.join(Exc_path,"media"),ExcData,1)
         copyfile(from_path,os.path.join(Exc_path,"media"),ExcData,2)
-    #    writeDoc(os.path.join(Exc_path,"错题.docx"),from_path,ExcData)
+        copy_all_file(os.path.join(Exc_path,"media"),to_path,ExcData)
+       
+
      
-        copy_all_file(os.path.join(Exc_path,"media"),to_path,ExcData)    
+            
     
     #print(ankiData)
  #   frame = pd.DataFrame(ankiData)
